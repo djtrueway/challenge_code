@@ -1,7 +1,16 @@
-class Category:
-    """docstring for ClassName."""
+# -*- coding: utf-8 -*-
 
-    def __init__(self, category):
+
+class Category:
+    """_summary_
+    """
+
+    def __init__(self, category: str):
+        """_summary_
+
+        Args:
+            category (str): _description_
+        """
         self.category = category
         self.ledger = []
 
@@ -16,12 +25,12 @@ class Category:
         self.ledger.append({"amount": amount, "description": description})
 
     def get_balance(self) -> float:
-        """return the balance category
+        """return the balance of the category
 
         Returns:
             float: _description_
         """
-        return sum([total['amount'] for item in self.ledger])
+        return sum([item['amount'] for item in self.ledger])
 
     def check_funds(self, amount: int) -> bool:
         """check is funds is disponible
@@ -32,8 +41,7 @@ class Category:
         Returns:
             bool: _description_
         """
-        if amount.isdigit():
-            return self.get_balance() >= amount
+        return self.get_balance() >= amount
 
     def withdraw(self,  amount: int, description: str = "") -> bool:
         """method for withdraw from the category
@@ -57,8 +65,8 @@ class Category:
         method for transfert money for another category
 
         Args:
-            amount (int): _description_
-            category_budget (object): _description_
+            amount (int): _description_ the amount to transfert
+            category_budget (object): _description_ object category who will be add the money
 
         Returns:
             bool: _description_
@@ -70,4 +78,21 @@ class Category:
         return False
 
     def __str__(self):
-        pass
+        """_summary_ representation the object in str format
+        """
+        title = f'{self.category.center(30, "*")} \n'
+        row_ledger = [list(value.values()) for value in self.ledger]
+        line = ''
+        for item in row_ledger:
+            row =  f'{item[1].ljust(23)} {str(item[0])[0:7]}\n'
+            line = line + row
+        return f'{title} {line} '
+
+
+
+food = Category(category="Food")
+food.deposit(1000, "initial deposit")
+food.withdraw(10, "groceries")
+food.withdraw(15, "restaurant and more foo")
+
+print(food)

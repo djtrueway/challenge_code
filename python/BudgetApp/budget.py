@@ -1,22 +1,16 @@
-# -*- coding: utf-8 -*-
-
-
 class Category:
-    """_summary_
-    """
 
     def __init__(self, category: str):
         """_summary_
 
         Args:
-            category (str): _description_
+          category (str): _description_ the name of category
         """
         self.category = category
         self.ledger = []
 
     def deposit(self, amount: int, description: str = "") -> None:
         """method for add money to the category
-
 
         Args:
             amount (int): _description_
@@ -43,7 +37,7 @@ class Category:
         """
         return self.get_balance() >= amount
 
-    def withdraw(self,  amount: int, description: str = "") -> bool:
+    def withdraw(self, amount: int, description: str = "") -> bool:
         """method for withdraw from the category
 
         Args:
@@ -55,12 +49,11 @@ class Category:
         """
 
         if self.check_funds(amount):
-            self.ledger.append(
-                {"amount": -amount, "description": description})
+            self.ledger.append({"amount": -amount, "description": description})
             return True
         return False
 
-    def transfert(self, amount: int, category_budget: object) -> bool:
+    def transfer(self, amount: int, category_budget: object) -> bool:
         """
         method for transfert money for another category
 
@@ -71,28 +64,63 @@ class Category:
         Returns:
             bool: _description_
         """
-        if self.withdraw(amount, description=f"Transfert vers [Catégorie budgétaire de {category_budget.category}] "):
-            category_budget.deposit(
-                amount, description=f"Transfert vers [Catégorie budgétaire de {self.category}] ")
+        if self.withdraw(amount,
+                         description=f"Transfer to {category_budget.category}"):
+            category_budget.deposit(amount,
+                                    description=f"Transfer from {self.category}")
             return True
         return False
 
     def __str__(self):
         """_summary_ representation the object in str format
         """
-        title = f'{self.category.center(30, "*")} \n'
+        title = f'{self.category.center(30, "*")}\n'
         row_ledger = [list(value.values()) for value in self.ledger]
         line = ''
         for item in row_ledger:
-            row =  f'{item[1].ljust(23)} {str(item[0])[0:7]}\n'
-            line = line + row
-        return f'{title} {line} '
+            row = f'{item[1].ljust(23)[:23]} {"{:.2f}".format(float(item[0]))[:7]}\n'
+            line += row
+        return f'{title}{line}Total: {self.get_balance()}'
 
 
+def create_spend_chart(categories: str) -> str:
+    """_summary_ . function return a string that is a bar chart. 
 
-food = Category(category="Food")
-food.deposit(1000, "initial deposit")
-food.withdraw(10, "groceries")
-food.withdraw(15, "restaurant and more foo")
+    Args:
+        categories (str): _description_ list of categories as an argument  
+    Returns:
+        str: _description_ return a string that is a bar chart.
+    """
+    
+    chart = "Percentage spent by category\n"
+    spendings = [
+        sum(item['amount'] for item in category.ledger if item['amount'] < 0)
+        for category in categories
+    ]
+    total_spent = sum(spendings)
+    percentages = [(spending / total_spent) * 100 for spending in spendings]
 
-print(food)
+    for i in range(100, -1, -10):
+        chart += str(i).rjust(3) + "| "
+        for percentage in percentages:
+            chart += "o" if percentage >= i else " "
+            chart += "  "
+        chart += "\n"
+
+    chart += "    ----------\n"
+
+    # Find the longest category name
+    max_len = max(len(category.category) for category in categories)
+
+    # Create vertical bars with category names
+    for i in range(max_len):
+        chart += "     "
+        for category in categories:
+            if i < len(category.category):
+                chart += category.category[i] + "  "
+            else:
+                chart += "   "
+        if i < max_len - 1:
+            chart += "\n"  # Add a newline after each vertical bar, except the last one
+
+    return chart
